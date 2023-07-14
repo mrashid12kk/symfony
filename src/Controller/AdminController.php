@@ -14,21 +14,68 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AdminController extends AbstractController
 {
-    #[Route('/', name: 'app_admin_index', methods: ['GET'])]
-    public function index(AdminRepository $adminRepository): Response
+    #[Route('/', name: 'app_index', methods: ['GET'])]
+    public function index(Request $request,AdminRepository $adminRepository): Response
     {
-        if ($this->getUser()) {
-            return $this->redirectToRoute('new');
+        $session = $request->getSession();
+        if ($session->has("email")) {
+            $email = $session->get("email");
+            echo $email;
+            
+        }else{
+            return $this->redirectToRoute('login');
+           
         }
         return $this->render('admin/index.html.twig', [
             'admins' => $adminRepository->findAll(),
         ]);
     }
-    #[Route('/login/', name: 'login', methods: ['GET'])]
-    public function logg(AdminRepository $adminRepository): Response
+    #[Route('/login', name: 'login', methods: ['GET'])]
+    public function login(Request $request,AdminRepository $adminRepository): Response
     {
+        $session = $request->getSession();
+        if ($session->has("email")) {
+            return $this->redirectToRoute("customer");
+            
+        }
+        
         return $this->render('admin/login.html.twig');
     }
+    #[Route('/logout', name: 'logout', methods: ['GET'])]
+    public function logout(Request $request,AdminRepository $adminRepository): Response
+    {
+        $session = $request->getSession();
+        if ($session->has("email")) {
+            return $this->redirectToRoute("login");
+            
+        }
+        
+        return $this->render('admin/login.html.twig');
+    }
+    #[Route('/submitLogin', name: 'submitLogin')]
+    public function submitLogin(Request $request,AdminRepository $adminRepository): Response
+    {
+         $email = $request->get('email');
+         $password = $request->get('password');
+        $user     = $adminRepository->findOneBy(['admin_email'=>$email,'password'=>$password]);
+        //dd($user);
+    if ($user === null) {
+        $this->addFlash('success', 'Categorie ajouté');
+        return $this->redirectToRoute('login');
+        
+    }else{
+        $session = $request->getSession();
+        $session->set('email', $user->getAdminEmail());
+        $session->set('admin_name', $user->getAdminName());
+        $session = $request->getSession();
+        dd($session);
+
+    }
+        return new response('fdfd');
+
+    
+    }
+   
 
     #[Route('/new', name: 'app_admin_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
@@ -86,5 +133,6 @@ class AdminController extends AbstractController
 
         return $this->redirectToRoute('app_admin_index', [], Response::HTTP_SEE_OTHER);
     }
+    
     
 }

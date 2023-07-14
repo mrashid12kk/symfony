@@ -2,18 +2,22 @@
 
 namespace App\Controller;
 
+use App\Entity\Admin;
+use App\Form\Admin1Type;
+use App\Repository\AdminRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+
 class HomeController extends AbstractController
 {
-    #[Route('/home/{name}', name: 'app_home',defaults:["name"=>null])]
-    public function index($name): Response
+    #[Route('admin/test2', name: 'test2', methods: ['GET'])]
+    public function index(AdminRepository $adminRepository): Response
     {
-        echo $name;
-        return $this->render('home/index.html.twig', [
-            'controller_name' => 'HomeController',
-        ]);
+        
+        return new response('admin/index.html.twig');
     }
 }
